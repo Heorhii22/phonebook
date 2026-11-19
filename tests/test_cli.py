@@ -11,9 +11,18 @@ def test_add_and_list(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> Non
     assert captured.out == "Added Anna\nAnna: 08009006570\n"
 
 
+def test_count_contacts(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    path = str(tmp_path / "contacts.json")
+    main(["--file", path, "add", "Anna", "08009006570"])
+    assert main(["--file", path, "count"]) == 0
+    captured = capsys.readouterr()
+    assert "Contacts: 1" in captured.out
+
+
 def test_get_empty_phonebook(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     path = tmp_path / "contacts.json"
     assert main(["--file", str(path), "list"]) == 0
+    
     captured = capsys.readouterr()
     assert "Phonebook is empty" in captured.out
 

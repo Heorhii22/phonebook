@@ -21,6 +21,7 @@ def build_parser() -> argparse.ArgumentParser:
     remove_parser = subparsers.add_parser("delete", help="Delete contact by name")
     remove_parser.add_argument("name")
 
+    subparsers.add_parser("count", help="Count contacts in phonebook")
     subparsers.add_parser("list", help="Show all contacts")
     return parser
 
@@ -43,6 +44,9 @@ def main(argv: list[str] | None = None) -> int:
             sorted_contacts = dict(sorted(contacts.items()))
             for name, phone in sorted_contacts.items():
                 print(f"{name}: {phone}")
+
+    elif args.command == "count":
+        print(f"Contacts: {len(contacts)}")
 
     elif args.command == "add":
         try:
