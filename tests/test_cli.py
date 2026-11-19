@@ -15,7 +15,7 @@ def test_get_empty_phonebook(tmp_path: Path, capsys: pytest.CaptureFixture[str])
     path = tmp_path / "contacts.json"
     assert main(["--file", str(path), "list"]) == 0
     captured = capsys.readouterr()
-    assert "No contacts" in captured.out
+    assert "Phonebook is empty" in captured.out
 
 
 @pytest.mark.parametrize("name, phone",
