@@ -38,7 +38,7 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.command == "list":
         if not contacts:
-            print("Phonebook is empty")
+            print("No contacts")
             
         else:
             sorted_contacts = dict(sorted(contacts.items()))
