@@ -23,4 +23,3 @@ def delete_contact(contacts: dict[str, str], name: str) -> None:
         raise ContactNotFoundError(f"Unable to find contact by name {name}")
 
     del contacts[name]
-
