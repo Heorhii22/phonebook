@@ -1,12 +1,16 @@
 import pytest
 
 from phonebook.errors import ContactNotFoundError
-from phonebook.service import add_contact, find_contact, delete_contact
+from phonebook.service import add_contact, find_contact, delete_contact, search_contact_by_part_name
 
 
 @pytest.fixture
 def sample_contacts() -> dict[str, str]:
-    return {"Anna": "08934847271", "Eduard": "0828020202"}
+    return {"Anna": "08934847271",
+            "Eduard": "0828020202",
+            "Annabel": "902940924",
+            "Jordan": "08048204820",
+            "James": "058058023492"}
 
 
 @pytest.mark.parametrize(("contacts, name, phone, expected"),
@@ -49,7 +53,22 @@ def test_find_contact_by_name(sample_contacts: dict[str, str]) -> None:
 
 def test_find_non_existed_contact_raises(sample_contacts: dict[str, str]) -> None:
     with pytest.raises(ContactNotFoundError, match="Unable to find contact"):
-        find_contact(sample_contacts, "James")
+        find_contact(sample_contacts, "Camilla")
+
+
+@pytest.mark.parametrize("query, expected",
+                         [
+                             ("j", {"Jordan": "08048204820", "James": "058058023492"}),
+                             (" j ", {"Jordan": "08048204820", "James": "058058023492"}),
+                             ("", {}),
+                             ("nna", {"Anna": "08934847271", "Annabel": "902940924"}),
+                             ("ANn", {"Anna": "08934847271", "Annabel": "902940924"}),
+                             ("annaaaa", {}),
+                             ("jprepjrep", {}),
+                             (" ", {})
+                         ])
+def test_search_contacts_by_partial_name(sample_contacts: dict[str, str], query: str, expected: dict[str, str]) -> None:
+    assert search_contact_by_part_name(sample_contacts, query) == expected
 
 
 def test_delete_contact(sample_contacts: dict[str, str]) -> None:
@@ -60,4 +79,4 @@ def test_delete_contact(sample_contacts: dict[str, str]) -> None:
 
 def test_delete_non_existed_contact_raises(sample_contacts: dict[str, str]) -> None:
     with pytest.raises(ContactNotFoundError, match="Unable to find contact"):
-        delete_contact(sample_contacts, "James")
+        delete_contact(sample_contacts, "Camilla")
