@@ -1,6 +1,7 @@
 import pytest
 from pathlib import Path
 from phonebook.cli import main
+from phonebook.storage import save_contacts
 
 
 def test_add_and_list(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
@@ -64,6 +65,26 @@ def test_find_by_not_existing_contact_name_fails(tmp_path: Path, capsys: pytest.
     assert "Error" in captured.err
     assert captured.out == "Added Anna\n"
 
+
+@pytest.mark.parametrize("query, message",
+                         [
+                             ("nNa", "Anna: 090380422414\nAnnabel: 080310442414\n"),
+                             ("Annabel", "Annabel: 080310442414\n"),
+                             ("James", "No contacts found\n"),
+                         ])
+def test_search_prints_matches_sorted_by_name(tmp_path: Path, query: str, message: str, capsys: pytest.CaptureFixture[str]) -> None:
+    path = tmp_path / "contacts.json"
+    save_contacts(path, {"Alla": "0808247202",
+                         "Annabel": "080310442414",
+                         "Anna": "090380422414",})
+    
+    exit_code = main(["--file", str(path), "search", query])
+    assert exit_code == 0
+    
+    captured = capsys.readouterr()
+    assert captured.out == message
+    assert captured.err == ""
+    
 
 def test_delete(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     path = str(tmp_path / "contacts.json")

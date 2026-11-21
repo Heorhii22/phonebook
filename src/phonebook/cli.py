@@ -4,7 +4,7 @@ from pathlib import Path
 
 from phonebook.errors import PhonebookError, StorageError
 from phonebook.storage import load_contacts, save_contacts
-from phonebook.service import add_contact, find_contact, delete_contact
+from phonebook.service import add_contact, find_contact, delete_contact, search_contact_by_part_name
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="phonebook")
@@ -15,8 +15,11 @@ def build_parser() -> argparse.ArgumentParser:
     add_parser.add_argument("name")
     add_parser.add_argument("phone")
 
-    search_parser = subparsers.add_parser("find", help="Phonebook search")
-    search_parser.add_argument("name")
+    find_parser = subparsers.add_parser("find", help="Phonebook search")
+    find_parser.add_argument("name")
+
+    search_parser = subparsers.add_parser("search", help="Search by partial name")
+    search_parser.add_argument("query")
 
     remove_parser = subparsers.add_parser("delete", help="Delete contact by name")
     remove_parser.add_argument("name")
@@ -66,6 +69,16 @@ def main(argv: list[str] | None = None) -> int:
         except PhonebookError as error:
             print(f"Error: {error}", file=sys.stderr)
             return 1
+
+    elif args.command == "search":
+        searched_contacts = search_contact_by_part_name(contacts, args.query)
+        if not searched_contacts:
+            print("No contacts found")
+            return 0
+
+        else:
+            for name, phone in sorted(searched_contacts.items()):
+                print(f"{name}: {phone}")
 
     elif args.command == "delete":
         try:
