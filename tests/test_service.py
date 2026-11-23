@@ -1,7 +1,7 @@
 import pytest
 
 from phonebook.errors import ContactNotFoundError
-from phonebook.service import add_contact, find_contact, delete_contact, search_contact_by_part_name
+from phonebook.service import add_contact, find_contact, delete_contact, search_contact_by_part_name, update_contact_phone
 
 
 @pytest.fixture
@@ -80,3 +80,32 @@ def test_delete_contact(sample_contacts: dict[str, str]) -> None:
 def test_delete_non_existed_contact_raises(sample_contacts: dict[str, str]) -> None:
     with pytest.raises(ContactNotFoundError, match="Unable to find contact"):
         delete_contact(sample_contacts, "Camilla")
+
+
+def test_update_contact_phone(sample_contacts: dict[str, str]) -> None:
+    update_contact_phone(sample_contacts, "Anna", "0403358357791")
+    assert sample_contacts == {
+                                "Anna": "0403358357791",
+                                "Eduard": "0828020202",
+                                "Annabel": "902940924",
+                                "Jordan": "08048204820",
+                                "James": "058058023492"
+                              }
+    assert sample_contacts["Anna"] == "0403358357791"
+
+
+@pytest.mark.parametrize(("name", "phone", "err_type", "message"),
+                         [
+                             ("Henry", "9032803840", ContactNotFoundError, "Unable to find contact"),
+                             ("", "", ContactNotFoundError, "Unable to find contact"),
+                             ("Anna", "soofnwofn", ValueError, "Phone must contain only numbers!"),
+                             ("Anna", "", ValueError, "Phone must contain only numbers!"),
+                             ("Anna", "+830436047 ", ValueError, "Phone must contain only numbers!"),
+                         ])
+def test_update_phone_with_invalid_data_raises(sample_contacts: dict[str, str], name: str, phone: str, err_type: type[Exception], message: str) -> None:
+    before = dict(sample_contacts)
+    
+    with pytest.raises(err_type, match=message):
+        update_contact_phone(sample_contacts, name, phone)
+
+    assert sample_contacts == before

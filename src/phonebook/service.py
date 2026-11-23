@@ -36,3 +36,13 @@ def search_contact_by_part_name(contacts: dict[str, str], query: str) -> dict[st
             searched_contacts[name] = phone
 
     return searched_contacts
+
+
+def update_contact_phone(contacts: dict[str, str], name: str, new_phone: str) -> None:
+    if name not in contacts:
+        raise ContactNotFoundError(f"Unable to find contact by name {name}")
+
+    if not new_phone.isdigit():
+        raise ValueError("Phone must contain only numbers!")
+
+    contacts[name] = new_phone

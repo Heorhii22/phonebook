@@ -1,7 +1,7 @@
 import pytest
 from pathlib import Path
 from phonebook.cli import main
-from phonebook.storage import save_contacts
+from phonebook.storage import load_contacts, save_contacts
 
 
 def test_add_and_list(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
@@ -129,5 +129,49 @@ def test_no_command_exits_with_code_2(
     assert "usage" in captured.err
 
 
+def test_update(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
+    path = tmp_path / "contacts.json"
+    contacts = {
+                "Alla": "0808247202",
+                "Annabel": "080310442414",
+                "Anna": "090380422414"
+               }
+    save_contacts(path, contacts)
+    exit_code = main(["--file", str(path), "update", "Anna", "123"])
+    assert exit_code == 0
+
+    captured = capsys.readouterr()
+    assert captured.out == "Updated Anna\n"
+
+    assert load_contacts(path) == {"Alla": "0808247202", "Annabel": "080310442414", "Anna": "123"}
+
+
+@pytest.mark.parametrize(("name", "phone", "message"),
+                         [
+                             ("Anna", "", "Phone must contain only numbers!"),
+                             ("Anna", "djvndivn", "Phone must contain only numbers!"),
+                             ("", "9034291", "Unable to find contact by name"),
+                             ("Mark", "9034291", "Unable to find contact by name"),
+                         ])
+def test_invalid_data_for_update(tmp_path: Path,
+                                 capsys: pytest.CaptureFixture[str],
+                                 name: str,
+                                 phone: str,
+                                 message: str) -> None:
+    path = tmp_path / "contacts.json"
+    contacts = {
+                "Alla": "0808247202",
+                "Annabel": "080310442414",
+                "Anna": "090380422414"
+               }
+    save_contacts(path, contacts)
+    
+    exit_code = main(["--file", str(path), "update", name, phone])
+    assert exit_code == 1
+
+    captured = capsys.readouterr()
+    assert message in captured.err
+
+    assert load_contacts(path) == contacts
 
 
