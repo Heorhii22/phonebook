@@ -1,5 +1,6 @@
 class PhonebookError(Exception):
-    "Application base error"
+    """Phonebook base exception class"""
+    ...
 
 class StorageError(PhonebookError):
     ...
