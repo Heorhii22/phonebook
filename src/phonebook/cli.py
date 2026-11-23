@@ -4,7 +4,8 @@ from pathlib import Path
 
 from phonebook.errors import PhonebookError, StorageError
 from phonebook.storage import load_contacts, save_contacts
-from phonebook.service import add_contact, find_contact, delete_contact, search_contact_by_part_name
+from phonebook.service import add_contact, find_contact, delete_contact, search_contact_by_part_name, update_contact_phone
+
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="phonebook")
@@ -23,6 +24,10 @@ def build_parser() -> argparse.ArgumentParser:
 
     remove_parser = subparsers.add_parser("delete", help="Delete contact by name")
     remove_parser.add_argument("name")
+
+    update_parser = subparsers.add_parser("update", help="Update contact phone")
+    update_parser.add_argument("name")
+    update_parser.add_argument("new_phone")
 
     subparsers.add_parser("count", help="Count contacts in phonebook")
     subparsers.add_parser("list", help="Show all contacts")
@@ -87,6 +92,20 @@ def main(argv: list[str] | None = None) -> int:
             print(f"Deleted {args.name}")
 
         except PhonebookError as error:
+            print(f"Error: {error}", file=sys.stderr)
+            return 1
+
+    elif args.command == "update":
+        try:
+            update_contact_phone(contacts, args.name, args.new_phone)
+            save_contacts(args.file, contacts)
+            print(f"Updated {args.name}")
+
+        except PhonebookError as error:
+            print(f"Error: {error}", file=sys.stderr)
+            return 1
+
+        except ValueError as error:
             print(f"Error: {error}", file=sys.stderr)
             return 1
     
