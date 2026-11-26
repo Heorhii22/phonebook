@@ -19,5 +19,6 @@ def load_contacts(path: Path) -> dict[str, str]:
     return data
 
 def save_contacts(path: Path, contacts: dict[str, str]) -> None:
+    """Save data tool on add, delete or update"""
     with open(path, "w", encoding="utf-8") as file:
         json.dump(contacts, file, ensure_ascii=False, indent=2)
