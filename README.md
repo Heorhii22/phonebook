@@ -50,7 +50,7 @@ python -m pip install -r requirements-dev.txt
 python -m pip install -e .
 ```
 
-4. Пользоваться программой:
+4. Как пользоваться программой:
 
 ```bash
 python -m phonebook add Anna 0501234567
